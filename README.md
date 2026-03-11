@@ -1,1 +1,2 @@
-hiii i am creating a project 
+# Angular Medication Management
+This repo contains the UI of an Angular medication management app.
