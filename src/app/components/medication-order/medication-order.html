@@ -1,0 +1,171 @@
+<div class="container mt-4">
+
+    <h2 class="fw-bold mb-4">Medication Order Form</h2>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+       
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                Patient Information
+            </div>
+
+            <div class="card-body" formGroupName="patientInfo">
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Patient ID *</label>
+                        <input type="text" class="form-control" formControlName="patientId">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Order Date *</label>
+                        <input type="date" class="form-control" formControlName="orderDate">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                Prescribing Information
+            </div>
+
+            <div class="card-body" formGroupName="prescribingInfo">
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Physician *</label>
+                        <select class="form-select" formControlName="physician">
+                            <option value="">Select Physician</option>
+
+                            @for (doc of physicianList; track doc) {
+                            <option [value]="doc">{{ doc }}</option>
+                            }
+                        </select>
+                    </div>
+
+              
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Therapy Type *</label>
+                        <select class="form-select" formControlName="therapyType">
+                            <option value="">Select Therapy</option>
+
+                            @for (type of therapyTypesList; track type) {
+                            <option [value]="type">{{ type }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    
+                    @if (form.get('prescribingInfo.therapyType')?.value === 'Chemotherapy') {
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Diagnosis *</label>
+                        <input type="text" class="form-control" formControlName="diagnosis">
+                    </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between bg-secondary text-white">
+                <span>Medications</span>
+                <span>Medications Added: {{ medications.length }}/10</span>
+            </div>
+
+            <div class="card-body">
+                <div formArrayName="medications">
+
+                    @for (med of medications.controls; let i = $index; track i) {
+
+                    <div class="border rounded p-3 mb-3" [formGroupName]="i">
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <h6>Medication {{ i + 1 }}</h6>
+
+                            <button type="button" class="btn btn-sm btn-danger" (click)="removeMedication(i)"
+                                [disabled]="medications.length === 1">
+                                Remove
+                            </button>
+                        </div>
+
+                        <div class="row">
+
+                          
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Drug Name *</label>
+                                <select class="form-select" formControlName="drugName">
+                                    <option value="">Select Drug</option>
+
+                                    @for (drug of drugs; track drug) {
+                                    <option [value]="drug">{{ drug }}</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 mb-3" formGroupName="dosage">
+                                <label class="form-label">Dosage Value *</label>
+                                <input type="number" class="form-control" formControlName="value">
+                            </div>
+
+                            <div class="col-md-3 mb-3" formGroupName="dosage">
+                                <label class="form-label">Unit *</label>
+                                <select class="form-select" formControlName="unit">
+                                    <option value="">Select Unit</option>
+
+                                    @for (unit of units; track unit) {
+                                    <option [value]="unit">{{ unit }}</option>
+                                    }
+                                </select>
+                            </div>
+
+                          
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Route *</label>
+                                <select class="form-select" formControlName="route">
+                                    <option value="">Select Route</option>
+
+                                    @for (route of routesList; track route) {
+                                    <option [value]="route">{{ route }}</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Frequency *</label>
+                                <select class="form-select" formControlName="frequency">
+                                    <option value="">Select Frequency</option>
+
+                                    @for (freq of frequencyList; track freq) {
+                                    <option [value]="freq">{{ freq }}</option>
+                                    }
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    }
+
+                </div>
+
+                <button type="button" class="btn btn-success" (click)="addMedication()"
+                    [disabled]="medications.length >= 10">
+                    Add Medication
+                </button>
+
+            </div>
+        </div>
+
+     
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+                Submit Order
+            </button>
+        </div>
+
+    </form>
+</div>
