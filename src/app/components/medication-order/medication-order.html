@@ -4,7 +4,7 @@
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
-       
+
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 Patient Information
@@ -15,7 +15,7 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Patient ID *</label>
-                        <input type="text" class="form-control" formControlName="patientId">
+                        <input type="number" class="form-control" formControlName="patientId">
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -36,34 +36,73 @@
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
+
                         <label class="form-label">Physician *</label>
                         <select class="form-select" formControlName="physician">
                             <option value="">Select Physician</option>
+
 
                             @for (doc of physicianList; track doc) {
                             <option [value]="doc">{{ doc }}</option>
                             }
                         </select>
+                        @if (
+                        form.get('prescribingInfo.physician')?.touched &&
+                        form.get('prescribingInfo.physician')?.errors?.['required']
+                        ) {
+                        <div class="text-danger mt-1">
+                            Physician is required
+                        </div>
+                        }
+
+                        @if (
+                        form.get('prescribingInfo.physician')?.touched &&
+                        form.get('prescribingInfo.physician')?.errors?.['mustContainDr']
+                        ) {
+                        <div class="text-danger mt-1">
+                            Physician must contain "Dr."
+                        </div>
+                        }
                     </div>
 
-              
+
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Therapy Type *</label>
                         <select class="form-select" formControlName="therapyType">
                             <option value="">Select Therapy</option>
-
                             @for (type of therapyTypesList; track type) {
                             <option [value]="type">{{ type }}</option>
                             }
                         </select>
                     </div>
 
-                    
+
                     @if (form.get('prescribingInfo.therapyType')?.value === 'Chemotherapy') {
+
                     <div class="col-md-12 mb-3">
                         <label class="form-label">Diagnosis *</label>
-                        <input type="text" class="form-control" formControlName="diagnosis">
+
+                        <select class="form-select" formControlName="diagnosis">
+
+                            <option value="">Select Diagnosis</option>
+
+                            @for (diag of diagnosisList; track diag) {
+                            <option [value]="diag">{{ diag }}</option>
+                            }
+
+                        </select>
+
+                        @if (
+                        form.get('prescribingInfo.diagnosis')?.touched &&
+                        form.get('prescribingInfo.diagnosis')?.errors?.['required']
+                        ) {
+                        <div class="text-danger mt-1">
+                            Diagnosis is required for Chemotherapy
+                        </div>
+                        }
+
                     </div>
+
                     }
 
                 </div>
@@ -94,7 +133,7 @@
 
                         <div class="row">
 
-                          
+
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Drug Name *</label>
                                 <select class="form-select" formControlName="drugName">
@@ -122,7 +161,7 @@
                                 </select>
                             </div>
 
-                          
+
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Route *</label>
                                 <select class="form-select" formControlName="route">
@@ -160,7 +199,7 @@
             </div>
         </div>
 
-     
+
         <div class="text-end">
             <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
                 Submit Order

@@ -48,3 +48,13 @@ export const physicians = [
   'Dr. Bilal Hassan',
   'Dr. Fatima Noor'
 ];
+export const chemotherapyDiagnoses = [
+  'Breast Cancer - Stage II',
+  'Breast Cancer - Stage III',
+  'Lung Cancer - Non Small Cell',
+  'Acute Myeloid Leukemia',
+  'Hodgkin Lymphoma',
+  'Non-Hodgkin Lymphoma',
+  'Ovarian Cancer',
+  'Colorectal Cancer'
+];

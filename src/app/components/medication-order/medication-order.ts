@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MedicationForm } from '../../services/medication-form';
-import { availableDrugs, routes,therapyTypes, dosageUnits, frequencies, physicians } from '../../constants/mock-data';
+import { availableDrugs, routes, therapyTypes, dosageUnits, frequencies, physicians, chemotherapyDiagnoses } from '../../constants/mock-data';
+import { MedicationValidators } from '../../validators/medication.validators';
 
 @Component({
   selector: 'app-medication-order',
@@ -18,6 +19,7 @@ export class MedicationOrder implements OnInit {
   units = dosageUnits
   frequencyList = frequencies
   physicianList = physicians
+  diagnosisList = chemotherapyDiagnoses
 
   form!: FormGroup;
 
@@ -25,7 +27,76 @@ export class MedicationOrder implements OnInit {
     this.form = this.formService.createMedicationOrderForm();
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+
+    const prescribingGroup = this.form.get('prescribingInfo') as FormGroup;
+
+    const therapyControl = prescribingGroup.get('therapyType');
+    const diagnosisControl = prescribingGroup.get('diagnosis');
+    const physicianControl = prescribingGroup.get('physician');
+
+    therapyControl?.valueChanges.subscribe((value) => {
+
+      if (value === 'Chemotherapy') {
+
+ 
+        diagnosisControl?.setValidators([Validators.required]);
+
+        physicianControl?.setValidators([
+          Validators.required,
+          MedicationValidators.mustContainDrValidator
+        ]);
+
+      } else {
+
+     
+        diagnosisControl?.clearValidators();
+
+        physicianControl?.setValidators([Validators.required]);
+      }
+
+      diagnosisControl?.updateValueAndValidity();
+      physicianControl?.updateValueAndValidity();
+    });
+
+
+    this.medications.controls.forEach((medGroup: any) => {
+
+      const routeControl = medGroup.get('route');
+      const dosageValueControl = medGroup.get('dosage.value');
+      const instructionsControl = medGroup.get('instructions');
+
+      routeControl?.valueChanges.subscribe((routeValue: string) => {
+
+        if (routeValue === 'IV') {
+
+          dosageValueControl?.setValidators([
+            Validators.required,
+            Validators.min(0.1)
+          ]);
+
+          instructionsControl?.setValidators([
+            Validators.required,
+            Validators.minLength(20)
+          ]);
+
+        } else {
+
+          dosageValueControl?.setValidators([
+            Validators.required,
+            Validators.min(1)
+          ]);
+
+          instructionsControl?.clearValidators();
+        }
+
+        dosageValueControl?.updateValueAndValidity();
+        instructionsControl?.updateValueAndValidity();
+      });
+
+    });
+
+  }
 
   get medications(): FormArray {
     return this.form.get('medications') as FormArray;
