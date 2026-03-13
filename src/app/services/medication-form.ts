@@ -21,8 +21,8 @@ export class MedicationForm {
       medications: new FormArray([
         this.createMedicationGroup()
       ],
-      {validators: [MedicationValidators.duplicateDrugValidator]}
-    )
+        { validators: [MedicationValidators.duplicateDrugValidator] }
+      )
     });
   }
 
@@ -44,6 +44,9 @@ export class MedicationForm {
   createMedicationGroup(): FormGroup<MedicationGroup> {
     return new FormGroup<MedicationGroup>({
       drugName: new FormControl(null, { validators: [Validators.required] }),
+
+      drugSearch: new FormControl(''),
+
       dosage: this.createDosageGroup(),
       route: new FormControl(null, { validators: [Validators.required] }),
       frequency: new FormControl(null, { validators: [Validators.required] }),

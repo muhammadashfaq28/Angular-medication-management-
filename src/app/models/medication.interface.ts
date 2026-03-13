@@ -7,6 +7,7 @@ export interface DosageGroup {
 
 export interface MedicationGroup {
   drugName: FormControl<string | null>;
+  drugSearch: FormControl<string | null>;
   dosage: FormGroup<DosageGroup>;
   route: FormControl<string | null>;
   frequency: FormControl<string | null>;
