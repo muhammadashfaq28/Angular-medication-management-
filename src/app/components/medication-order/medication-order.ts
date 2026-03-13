@@ -3,11 +3,20 @@ import { FormArray, FormGroup, ReactiveFormsModule, Validators } from '@angular/
 import { MedicationForm } from '../../services/medication-form';
 import { availableDrugs, routes, therapyTypes, dosageUnits, frequencies, physicians, chemotherapyDiagnoses } from '../../constants/mock-data';
 import { MedicationValidators } from '../../validators/medication.validators';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-medication-order',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule, MatCardModule, MatFormFieldModule,
+    MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, MatDividerModule],
   templateUrl: './medication-order.html',
   styleUrl: './medication-order.css',
 })
@@ -39,7 +48,7 @@ export class MedicationOrder implements OnInit {
 
       if (value === 'Chemotherapy') {
 
- 
+
         diagnosisControl?.setValidators([Validators.required]);
 
         physicianControl?.setValidators([
@@ -49,7 +58,7 @@ export class MedicationOrder implements OnInit {
 
       } else {
 
-     
+
         diagnosisControl?.clearValidators();
 
         physicianControl?.setValidators([Validators.required]);
@@ -96,6 +105,46 @@ export class MedicationOrder implements OnInit {
 
     });
 
+    this.medications.controls.forEach((med: any) => {
+      this.applyRouteValidation(med);
+    });
+
+
+  }
+
+  private applyRouteValidation(medGroup: FormGroup) {
+
+    const routeControl = medGroup.get('route');
+    const dosageValueControl = medGroup.get('dosage.value');
+    const instructionsControl = medGroup.get('instructions');
+
+    routeControl?.valueChanges.subscribe(routeValue => {
+
+      if (routeValue === 'IV') {
+
+        dosageValueControl?.setValidators([
+          Validators.required,
+          Validators.min(0.1)
+        ]);
+
+        instructionsControl?.setValidators([
+          Validators.required,
+          Validators.minLength(20)
+        ]);
+
+      } else {
+
+        dosageValueControl?.setValidators([
+          Validators.required,
+          Validators.min(1)
+        ]);
+
+        instructionsControl?.clearValidators();
+      }
+
+      dosageValueControl?.updateValueAndValidity();
+      instructionsControl?.updateValueAndValidity();
+    });
   }
 
   get medications(): FormArray {
@@ -103,7 +152,12 @@ export class MedicationOrder implements OnInit {
   }
 
   addMedication() {
-    this.medications.push(this.formService.createMedicationGroup());
+
+    const newMed = this.formService.createMedicationGroup();
+    this.medications.push(newMed);
+    this.medications.updateValueAndValidity()
+    this.applyRouteValidation(newMed);
+
   }
 
   removeMedication(index: number) {

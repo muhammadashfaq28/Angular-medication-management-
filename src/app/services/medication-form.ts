@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { MedicationValidators } from '../validators/medication.validators';
 import {
   DosageGroup,
   MedicationGroup,
@@ -19,7 +20,9 @@ export class MedicationForm {
       prescribingInfo: this.createPrescribingInfoGroup(),
       medications: new FormArray([
         this.createMedicationGroup()
-      ])
+      ],
+      {validators: [MedicationValidators.duplicateDrugValidator]}
+    )
     });
   }
 
