@@ -16,7 +16,7 @@
             <div class="unsave-banner">
                 ⚠ You have unsaved changes
             </div>
-        }
+            }
 
             <div class="form-grid" formGroupName="patientInfo">
 
@@ -239,6 +239,10 @@
                             <mat-label>Instructions</mat-label>
                             <textarea matInput rows="3" formControlName="instructions"></textarea>
 
+                            <mat-hint align="end">
+                                {{ med.get('instructions')?.value?.length || 0 }}/100
+                            </mat-hint>
+
                             @if (med.get('instructions')?.invalid && med.get('instructions')?.touched) {
                             <mat-error>
                                 @if (med.get('instructions')?.errors?.['required']) {
@@ -269,10 +273,30 @@
         </mat-card>
 
         <div class="submit-section">
-            <button mat-raised-button color="accent" (click)="onSubmit()" [disabled]="form.invalid">
-                Submit Order
-            </button>
+            <div class="left-buttons">
+                <button type="button" mat-raised-button color="accent" (click)="restoreDraft()">
+                    Restore Draft
+                </button>
+
+                <button type="button" mat-raised-button color="accent" (click)="clearAll()">
+                    Clear All
+                </button>
+
+                <button type="button" mat-raised-button color="accent" (click)="discardChanges()">
+                    Discard Changes
+                </button>
+                <button type="button" mat-raised-button color="accent" (click)="clearDraft()">
+                    Clear Draft
+                </button>
+            </div>
+
+            <div class="right-button">
+                <button mat-raised-button color="accent" (click)="onSubmit()" [disabled]="form.invalid">
+                    Submit Order
+                </button>
+            </div>
         </div>
+
 
     </form>
 </div>

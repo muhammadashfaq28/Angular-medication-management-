@@ -15,6 +15,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { debounceTime, distinctUntilChanged, startWith } from 'rxjs/operators';
 import { log } from 'console';
+import { CanComponentDeactivate } from '../../guards/unsaved-changes-guard';
 
 
 
@@ -27,6 +28,8 @@ import { log } from 'console';
   styleUrl: './medication-order.css',
 })
 export class MedicationOrder implements OnInit {
+
+
 
   drugs = availableDrugs;
   routesList = routes
@@ -134,8 +137,8 @@ export class MedicationOrder implements OnInit {
 
     /*  Track form changes to set unsaved changes flag */
 
-    this.form.valueChanges.subscribe(() =>{
-      if(this.form.dirty){
+    this.form.valueChanges.subscribe(() => {
+      if (this.form.dirty) {
         this.hasUnsaveChanges = true
       }
     })
@@ -146,27 +149,36 @@ export class MedicationOrder implements OnInit {
     this.form.valueChanges.pipe(
       debounceTime(5000)
     ).subscribe(() => {
+
       if (this.form.dirty && this.form.valid) {
-        localStorage .setItem('medication-draft', 
-          JSON.stringify(this.form.getRawValue()));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('medication-draft',
+            JSON.stringify(this.form.getRawValue()));
+          console.log('Draft Saved');
+        }
       }
-     
-      console.log('Draft Saved');
+
     });
 
     // ye draft saved ko console ma show karega jab bhi form ma changes karenge aur 5 second
     //  ke baad jab form valid hoga tabhi localStorage ma save karega
+    // typeof window check karta h k browser environment ma h ya server side rendering ma h 
+    // taki localStorage access kar sake without error
 
-    const savedDraft = localStorage.getItem('medication-draft');
-    if (savedDraft) {
-      const data = JSON.parse(savedDraft);
-      this.form.patchValue(data);
+    if (typeof window !== 'undefined') {
+      const savedDraft = localStorage.getItem('medication-draft');
+      if (typeof window !== 'undefined')
+        if (savedDraft) {
+
+          const data = JSON.parse(savedDraft);
+          this.form.patchValue(data);
+        }
     }
   }
 
-//unsaveChanges 
-  hasUnsaveChanges = false
-  
+  //unsaveChanges 
+  hasUnsaveChanges: boolean = false
+
   submitted = false;
 
   private applyRouteValidation(medGroup: FormGroup) {
@@ -228,12 +240,59 @@ export class MedicationOrder implements OnInit {
     this.submitted = true;
 
     if (this.formService.validateForm(this.form)) {
+      alert('✅  Medication Order Submitted Successfully!');
       console.log(this.form.value);
-
-      this.hasUnsaveChanges = false
       this.form.markAsPristine()
     }
+  }
 
 
+  // yee agr ham apnt draft ko restore karna chahte h to localStorage se item get karega
+  //  aur form ma patchValue k through data fill kar dega
+  restoreDraft() {
+
+    if (typeof window !== 'undefined') { }
+
+    const savedDraft = localStorage.getItem('medication-draft')
+    if (savedDraft) {
+
+      const data = JSON.parse(savedDraft)
+      this.form.patchValue(data)
+      console.log('Draft Restored');
+    } else {
+      console.log('No Draft Found');
+    }
+  }
+  // yee draft cler karne k liye h localStorage se item remove kar dega aur console ma message show karega
+  clearDraft() {
+    if (typeof window !== 'undefined')
+      localStorage.removeItem('medication-draft')
+    console.log('Draft Cleared');
+  }
+
+  // clearall form fields
+  clearAll() {
+    const patientInfo = this.form.get('patientInfo')?.value
+    this.form.reset()
+
+    // patientinfo wapis set kar raha h 
+    this.form.patchValue({
+      patientInfo: patientInfo
+    })
+  }
+
+  // yee last save draft par jata h dirty state reset kar deta h aur form ko wapis pristine bana deta h 
+
+  discardChanges() {
+    if (typeof window !== 'undefined') {
+      const saveddraft = localStorage.getItem('medication-draft')
+      if (saveddraft) {
+        const data = JSON.parse(saveddraft)
+        this.form.patchValue(data)
+        this.form.markAsPristine()
+        this.hasUnsaveChanges = false
+        console.log('Changes Discarded, Reverted to Last Saved Draft');
+      }
+    }
   }
 }
