@@ -13,8 +13,10 @@ import { MatDividerModule } from '@angular/material/divider';
 import { CommonModule } from '@angular/common';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, startWith } from 'rxjs/operators';
+import { log } from 'console';
+
+
 
 @Component({
   selector: 'app-medication-order',
@@ -35,20 +37,20 @@ export class MedicationOrder implements OnInit {
   diagnosisList = chemotherapyDiagnoses
 
   form!: FormGroup;
-
+  // yee constructure ma main form service inject kar raha hu aur form create kar raha hu jo medication order form return karta h
   constructor(private formService: MedicationForm) {
     this.form = this.formService.createMedicationOrderForm();
   }
 
-
+  // yee har medication k har index par full list show karwata h or Route validation apply karta h or drug search setup karta h
   ngOnInit(): void {
-
     this.medications.controls.forEach((med, index) => {
       this.filteredDrugsPerIndex[index] = this.drugs;
       this.applyRouteValidation(med as FormGroup);
       this.setupDrugSearch(med as FormGroup, index);
     });
 
+    // yee theorapy type k hisab se diagnosis aur physician k validation set karta h
     const prescribingGroup = this.form.get('prescribingInfo') as FormGroup;
     const therapyControl = prescribingGroup.get('therapyType');
     const diagnosisControl = prescribingGroup.get('diagnosis');
@@ -71,52 +73,55 @@ export class MedicationOrder implements OnInit {
       physicianControl?.updateValueAndValidity();
     });
 
-    this.medications.controls.forEach((medGroup: any) => {
 
-      const routeControl = medGroup.get('route');
-      const dosageValueControl = medGroup.get('dosage.value');
-      const instructionsControl = medGroup.get('instructions');
-      routeControl?.valueChanges.subscribe((routeValue: string) => {
+    // this.medications.controls.forEach((medGroup: any) => {
+    //   const routeControl = medGroup.get('route');
+    //   const dosageValueControl = medGroup.get('dosage.value');
+    //   const instructionsControl = medGroup.get('instructions');
+    //   routeControl?.valueChanges.subscribe((routeValue: string) => {
 
-        if (routeValue === 'IV') {
-          dosageValueControl?.setValidators([
-            Validators.required,
-            Validators.min(0.1)
-          ]);
-          instructionsControl?.setValidators([
-            Validators.required,
-            Validators.minLength(20)
-          ]);
-        } else {
-          dosageValueControl?.setValidators([
-            Validators.required,
-            Validators.min(1)
-          ]);
-          instructionsControl?.clearValidators();
-        }
-        dosageValueControl?.updateValueAndValidity();
-        instructionsControl?.updateValueAndValidity();
-      });
-    });
+    //     if (routeValue === 'IV') {
+    //       dosageValueControl?.setValidators([
+    //         Validators.required,
+    //         Validators.min(0.1)
+    //       ]);
+    //       instructionsControl?.setValidators([
+    //         Validators.required,
+    //         Validators.minLength(20)
+    //       ]);
+    //     } else {
+    //       dosageValueControl?.setValidators([
+    //         Validators.required,
+    //         Validators.min(1)
+    //       ]);
+    //       instructionsControl?.clearValidators();
+    //     }
+    //     dosageValueControl?.updateValueAndValidity();
+    //     instructionsControl?.updateValueAndValidity();
+    //   });
+    // });
 
-    this.medications.controls.forEach((med: any) => {
-      this.applyRouteValidation(med);
-    });
+    // this.medications.controls.forEach((med: any) => {
+    //   this.applyRouteValidation(med);
+    // });
 
   }
+
+  // yee 2 dimentional array h matlab har medication index par sari list show ho medicines ki aur jab search
+  //  karega to us index par filter hoga baki index par sari list show hogi
   filteredDrugsPerIndex: string[][] = [];
 
   private setupDrugSearch(medGroup: FormGroup, index: number) {
 
     const searchControl = medGroup.get('drugSearch') as FormControl;
 
-  
+
     this.filteredDrugsPerIndex[index] = this.drugs;
 
     searchControl.valueChanges.pipe(
       startWith(''),
       debounceTime(300),
-      distinctUntilChanged()
+      distinctUntilChanged(),
     ).subscribe((value: string | null) => {
 
       const term = (value || '').toLowerCase().trim();
@@ -126,9 +131,42 @@ export class MedicationOrder implements OnInit {
       );
 
     });
+
+    /*  Track form changes to set unsaved changes flag */
+
+    this.form.valueChanges.subscribe(() =>{
+      if(this.form.dirty){
+        this.hasUnsaveChanges = true
+      }
+    })
+
+
+    /*  Auto-save draft to localStorage after 5 seconds of inactivity*/
+
+    this.form.valueChanges.pipe(
+      debounceTime(5000)
+    ).subscribe(() => {
+      if (this.form.dirty && this.form.valid) {
+        localStorage .setItem('medication-draft', 
+          JSON.stringify(this.form.getRawValue()));
+      }
+     
+      console.log('Draft Saved');
+    });
+
+    // ye draft saved ko console ma show karega jab bhi form ma changes karenge aur 5 second
+    //  ke baad jab form valid hoga tabhi localStorage ma save karega
+
+    const savedDraft = localStorage.getItem('medication-draft');
+    if (savedDraft) {
+      const data = JSON.parse(savedDraft);
+      this.form.patchValue(data);
+    }
   }
 
-
+//unsaveChanges 
+  hasUnsaveChanges = false
+  
   submitted = false;
 
   private applyRouteValidation(medGroup: FormGroup) {
@@ -191,6 +229,11 @@ export class MedicationOrder implements OnInit {
 
     if (this.formService.validateForm(this.form)) {
       console.log(this.form.value);
+
+      this.hasUnsaveChanges = false
+      this.form.markAsPristine()
     }
+
+
   }
 }

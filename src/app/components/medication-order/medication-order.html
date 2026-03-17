@@ -5,11 +5,18 @@
         <p>Advanced Reactive Prescription Management</p>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container">
+    <form [formGroup]="form" class="form-container">
+
 
         <mat-card class="section-card">
             <mat-card-title>Patient Information</mat-card-title>
             <mat-divider></mat-divider>
+            @if(hasUnsaveChanges){
+
+            <div class="unsave-banner">
+                ⚠ You have unsaved changes
+            </div>
+        }
 
             <div class="form-grid" formGroupName="patientInfo">
 
@@ -25,7 +32,7 @@
                     }
                 </mat-form-field>
 
-               
+
                 <mat-form-field appearance="outline">
                     <mat-label>Order Date</mat-label>
                     <input matInput [matDatepicker]="picker" formControlName="orderDate">
@@ -139,7 +146,7 @@
                     <div class="med-card-header">
                         <h4>Medication {{ i + 1 }}</h4>
 
-                        <button mat-icon-button color="warn" (click)="removeMedication(i)"
+                        <button type="button" mat-icon-button color="warn" (click)="removeMedication(i)"
                             [disabled]="medications.length === 1">
                             <mat-icon>delete</mat-icon>
                         </button>
@@ -151,12 +158,13 @@
                         <mat-form-field appearance="outline">
                             <mat-label>Drug</mat-label>
 
-                            <mat-select formControlName="drugName">
+                            <mat-select formControlName="drugName" #drugSelect>
 
-                               
+                                <!-- Search Box Option -->
                                 <mat-option>
                                     <input matInput placeholder="Search drug..." formControlName="drugSearch"
-                                        (click)="$event.stopPropagation()">
+                                        (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"
+                                        autocomplete="off">
                                 </mat-option>
 
                                 @for (drug of filteredDrugsPerIndex[i]; track drug) {
@@ -180,7 +188,7 @@
                             <mat-label>Dosage</mat-label>
                             <input matInput type="number" formControlName="value">
 
-                            @if (med.get('dosage.value')?.invalid && med.get('dosage.value')?.touched) {
+                            @if (med.get('dosage.value')?.errors?.['required'] && med.get('dosage.value')?.touched) {
                             <mat-error>
                                 @if (med.get('dosage.value')?.errors?.['required']) {
                                 Dosage is required
@@ -252,7 +260,7 @@
             </div>
 
             <div class="add-btn">
-                <button mat-raised-button color="primary" (click)="addMedication()"
+                <button type="button" mat-raised-button color="primary" (click)="addMedication()"
                     [disabled]="medications.length >= 10">
                     Add Medication
                 </button>
@@ -261,7 +269,7 @@
         </mat-card>
 
         <div class="submit-section">
-            <button mat-raised-button color="accent" type="submit" [disabled]="form.invalid">
+            <button mat-raised-button color="accent" (click)="onSubmit()" [disabled]="form.invalid">
                 Submit Order
             </button>
         </div>

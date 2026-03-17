@@ -61,10 +61,10 @@ export class MedicationForm {
     });
   }
 
+
   populateFromExisting(form: FormGroup, data: any): void {
     form.patchValue(data);
   }
-
   validateForm(form: FormGroup): boolean {
     form.markAllAsTouched();
     return form.valid;

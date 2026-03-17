@@ -88,3 +88,12 @@
   margin-bottom: 16px;
   font-weight: 500;
 }
+.unsave-banner{
+  background: #b5ae98;
+  color: #d11111;
+  padding: 10px;
+  border-left: 10px solid green;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  margin-top: 8px;
+}
