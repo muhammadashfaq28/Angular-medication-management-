@@ -30,6 +30,9 @@
                     ) {
                     <mat-error>Patient ID is required</mat-error>
                     }
+                    @if (form.get('patientInfo.patientId')?.valid && form.get('patientInfo.patientId')?.touched) {
+                    <mat-hint class="valid-hint">✔ Valid</mat-hint>
+                    }
                 </mat-form-field>
 
 
@@ -44,6 +47,9 @@
                     form.get('patientInfo.orderDate')?.touched
                     ) {
                     <mat-error>Order Date is required</mat-error>
+                    }
+                    @if (form.get('patientInfo.orderDate')?.valid && form.get('patientInfo.orderDate')?.touched) {
+                    <mat-hint class="valid-hint">✔ Valid</mat-hint>
                     }
                 </mat-form-field>
 
@@ -79,6 +85,10 @@
                         }
                     </mat-error>
                     }
+                    @if (form.get('prescribingInfo.physician')?.valid && form.get('prescribingInfo.physician')?.touched)
+                    {
+                    <mat-hint class="valid-hint">✔ Valid</mat-hint>
+                    }
                 </mat-form-field>
 
                 <!-- Therapy -->
@@ -95,6 +105,10 @@
                     form.get('prescribingInfo.therapyType')?.touched
                     ) {
                     <mat-error>Therapy Type is required</mat-error>
+                    }
+                    @if (form.get('prescribingInfo.therapyType')?.valid &&
+                    form.get('prescribingInfo.therapyType')?.touched) {
+                    <mat-hint class="valid-hint">✔ Valid</mat-hint>
                     }
                 </mat-form-field>
 
@@ -114,6 +128,10 @@
                     form.get('prescribingInfo.diagnosis')?.touched
                     ) {
                     <mat-error>Diagnosis is required for Chemotherapy</mat-error>
+                    }
+                    @if (form.get('prescribingInfo.diagnosis')?.valid && form.get('prescribingInfo.diagnosis')?.touched)
+                    {
+                    <mat-hint class="valid-hint">✔ Valid</mat-hint>
                     }
                 </mat-form-field>
 
@@ -160,12 +178,14 @@
 
                             <mat-select formControlName="drugName" #drugSelect>
 
-                                <!-- Search Box Option -->
+                                
                                 <mat-option>
                                     <input matInput placeholder="Search drug..." formControlName="drugSearch"
                                         (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"
                                         autocomplete="off">
                                 </mat-option>
+
+                                <!-- List of filtered drugs based on search term -->
 
                                 @for (drug of filteredDrugsPerIndex[i]; track drug) {
                                 <mat-option [value]="drug">
@@ -175,14 +195,25 @@
 
                             </mat-select>
 
+                            
                             @if (
                             med.get('drugName')?.hasError('required') &&
                             (med.get('drugName')?.touched || submitted)
-                            ){
+                            ) {
                             <mat-error>Drug is required</mat-error>
                             }
-                        </mat-form-field>
 
+                            <!-- custom duplicate drug error -->
+
+                            @if (med.get('drugName')?.errors?.['drugExists']) {
+                            <mat-error>
+                                Drug {{ med.get('drugName')?.errors?.['drugExists']?.name }}
+                                already exists (ID:
+                                {{ med.get('drugName')?.errors?.['drugExists']?.id }})
+                            </mat-error>
+                            }
+
+                        </mat-form-field>
                         <!-- Dosage -->
                         <mat-form-field appearance="outline" formGroupName="dosage">
                             <mat-label>Dosage</mat-label>
@@ -198,6 +229,9 @@
                                 }
                             </mat-error>
                             }
+                            <mat-hint>
+                                Max allowed: 10
+                            </mat-hint>
                         </mat-form-field>
 
                         <!-- Unit -->
@@ -211,6 +245,9 @@
 
                             @if (med.get('dosage.unit')?.invalid && med.get('dosage.unit')?.touched) {
                             <mat-error>Unit is required</mat-error>
+                            }
+                            @if (med.get('dosage.unit')?.valid && med.get('dosage.unit')?.touched) {
+                            <mat-hint class="valid-hint">✔ Valid</mat-hint>
                             }
                         </mat-form-field>
 
@@ -253,6 +290,10 @@
                                 }
                             </mat-error>
                             }
+                            @if (med.get('instructions')?.valid && med.get('instructions')?.touched)
+                            {
+                            <mat-hint class="valid-hint">✔ Valid</mat-hint>
+                            }
                         </mat-form-field>
 
                     </div>
@@ -287,6 +328,13 @@
                 </button>
                 <button type="button" mat-raised-button color="accent" (click)="clearDraft()">
                     Clear Draft
+                </button>
+
+                <button type="button" mat-raised-button color="accent" (click)="toggleViewMode()">
+                    {{ isViewOnly ? 'Edit Mode' : 'View Mode' }}
+                </button>
+                <button type="button" mat-raised-button color="accent" (click)="logValues()">
+                    All Values
                 </button>
             </div>
 

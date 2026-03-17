@@ -40,6 +40,7 @@ export class MedicationOrder implements OnInit {
   diagnosisList = chemotherapyDiagnoses
 
   form!: FormGroup;
+  
   // yee constructure ma main form service inject kar raha hu aur form create kar raha hu jo medication order form return karta h
   constructor(private formService: MedicationForm) {
     this.form = this.formService.createMedicationOrderForm();
@@ -116,6 +117,7 @@ export class MedicationOrder implements OnInit {
 
   private setupDrugSearch(medGroup: FormGroup, index: number) {
 
+    const drugControl = medGroup.get('drugName') as FormControl;
     const searchControl = medGroup.get('drugSearch') as FormControl;
 
 
@@ -132,6 +134,15 @@ export class MedicationOrder implements OnInit {
       this.filteredDrugsPerIndex[index] = this.drugs.filter(drug =>
         drug.toLowerCase().includes(term)
       );
+
+      // Custome Duplicate Drug Error Clear on Search
+      setTimeout(() => {
+        if(value === 'Aspirin'){
+          drugControl.setErrors({ 
+            drugExists: {name: 'Aspirin', id:101}
+          });
+        }
+      }, 0);
 
     });
 
@@ -238,11 +249,22 @@ export class MedicationOrder implements OnInit {
 
   onSubmit() {
     this.submitted = true;
+    //show all error requirement on submit
+    this.form.markAllAsTouched();
+    if(this.form.invalid){
+      return;
+    }
+    // yaha confirm kar raha h submit karny sy phly
+    const confirmSubmit = confirm('Are you sure you want to submit the medication order?');
+    if(!confirmSubmit){
+      return;
+    }
+
 
     if (this.formService.validateForm(this.form)) {
       alert('✅  Medication Order Submitted Successfully!');
-      console.log(this.form.value);
-      this.form.markAsPristine()
+      console.log(this.form.getRawValue());
+      this.hasUnsaveChanges = false;
     }
   }
 
@@ -295,4 +317,37 @@ export class MedicationOrder implements OnInit {
       }
     }
   }
+
+  //  loadPartialData() {
+  //   const partial = {
+  //     patientInfo: {
+  //       patientId: 123
+  //     }
+  // }
+  // this.form.patchValue(partial)
+  // console.log('Partial Data Loaded', partial);
+  //  }
+
+   logValues(){
+     console.log('Form Value:', this.form.value);
+    console.log('Form Values Raw Value:', this.form.getRawValue());
+   }
+
+   isViewOnly: boolean = false;
+
+toggleViewMode() {
+
+
+  if (this.isViewOnly) {
+    this.form.enable();
+    this.isViewOnly = false; 
+    console.log('Switched to Edit Mode');
+  } 
+  else {
+    this.form.disable();
+    this.isViewOnly = true;
+    console.log('Switched to View-Only Mode');
+  }
+}
+
 }
