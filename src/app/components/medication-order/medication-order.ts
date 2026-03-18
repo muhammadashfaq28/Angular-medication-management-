@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MedicationForm } from '../../services/medication-form';
 import { availableDrugs, routes, therapyTypes, dosageUnits, frequencies, physicians, chemotherapyDiagnoses } from '../../constants/mock-data';
@@ -14,8 +14,6 @@ import { CommonModule } from '@angular/common';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { debounceTime, distinctUntilChanged, startWith } from 'rxjs/operators';
-import { log } from 'console';
-import { CanComponentDeactivate } from '../../guards/unsaved-changes-guard';
 
 
 
@@ -111,6 +109,8 @@ export class MedicationOrder implements OnInit {
 
   }
 
+  
+
   // yee 2 dimentional array h matlab har medication index par sari list show ho medicines ki aur jab search
   //  karega to us index par filter hoga baki index par sari list show hogi
   filteredDrugsPerIndex: string[][] = [];
@@ -187,9 +187,23 @@ export class MedicationOrder implements OnInit {
     }
   }
 
+  
+
   //unsaveChanges 
   hasUnsaveChanges: boolean = false
+  
+@HostListener('window:beforeunload', ['$event'])
+handleBeforeUnload(event: BeforeUnloadEvent) {
 
+  if (this.hasUnsaveChanges) {
+
+    event.preventDefault();
+
+    event.returnValue = '';
+
+  }
+
+}
   submitted = false;
 
   private applyRouteValidation(medGroup: FormGroup) {
@@ -349,5 +363,14 @@ toggleViewMode() {
     console.log('Switched to View-Only Mode');
   }
 }
+saveDraftManually() {
+  if(typeof window !== 'undefined'){
+    const data = this.form.getRawValue();
+    localStorage.setItem('medication-draft', JSON.stringify(data))
+    console.log('Draft Saved Manually');
+  }
+}
+
+
 
 }

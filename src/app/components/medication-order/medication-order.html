@@ -304,9 +304,11 @@
 
             </div>
 
+
+              <!-- yee add medication tb tak disable rhy ga jb tak previous added medication ki all fields valid n aho jy --> 
             <div class="add-btn">
                 <button type="button" mat-raised-button color="primary" (click)="addMedication()"
-                    [disabled]="medications.length >= 10">
+                    [disabled]="medications.length >= 10 || medications.invalid">
                     Add Medication
                 </button>
             </div>
@@ -328,6 +330,9 @@
                 </button>
                 <button type="button" mat-raised-button color="accent" (click)="clearDraft()">
                     Clear Draft
+                </button>
+                <button type="button" mat-raised-button color="accent" (click)="saveDraftManually()">
+                    Save Draft
                 </button>
 
                 <button type="button" mat-raised-button color="accent" (click)="toggleViewMode()">
