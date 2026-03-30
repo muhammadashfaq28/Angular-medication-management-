@@ -191,7 +191,8 @@ export class MedicationOrder implements OnInit {
 
   //unsaveChanges 
   hasUnsaveChanges: boolean = false
-  
+  // yee hostlistner jb b ham refresh karenge ya page close karenge to ye function call hoga aur check karega
+  //  k kya unsaved changes h agar h to user se confirm karega k kya wo sure h refresh ya close karne k liye
 @HostListener('window:beforeunload', ['$event'])
 handleBeforeUnload(event: BeforeUnloadEvent) {
 
